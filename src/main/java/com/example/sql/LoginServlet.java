@@ -57,7 +57,7 @@ public class LoginServlet extends HttpServlet {
              // kör SELECT * FROM users så att du är 100% säker på att du har users i din databas
 
              // ändra rad 50 till detta:
-             // DriverManager.getConnection(url, user, pw);
+             // DriverManager.getConnection(dbUrl, user, pw);
 
              // se då till att du har, och att du stavat 100% korrekt:
              //     @Value("${spring.datasource.username}")
