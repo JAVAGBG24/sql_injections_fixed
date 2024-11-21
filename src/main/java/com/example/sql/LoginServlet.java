@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
+
+
 // en servlet med namnet "LoginServlet" som hanterar förfrågningar på "/login".
 @WebServlet(name = "LoginServlet", urlPatterns = "/login")
 public class LoginServlet extends HttpServlet {
@@ -19,6 +21,12 @@ public class LoginServlet extends HttpServlet {
     // hämtar databas-URL från applikationens konfigurationsfil via Spring-annotering.
     @Value("${spring.datasource.url}")
     private String dbUrl;
+
+    @Value("${spring.datasource.username}")
+    private String user;
+
+    @Value("${spring.datasource.password}")
+    private String pw;
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -28,20 +36,35 @@ public class LoginServlet extends HttpServlet {
         String password = request.getParameter("password");
         // hämtar username och lösenord från formulärdata som skickas i förfrågan.
 
-        String sql = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'";
+        // SÅ HÄR FÅR MAN ABSOLUT INTE SKRIVA SQL QUERIES
+        //String sql = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'";
+        // matade in: ' OR '1'='1 på username och password och fick success!
+
+        // SÅ HÄR SKA VI ALLTID GÖRA, SÄKERT SÄTT
+        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+
         // skapar en SQL-query för att hitta användaren baserat på användarnamn och lösenord.
 
+        //Statement statement = connection.createStatement();
+        //ResultSet resultSet = statement.executeQuery(sql)) {
+        // skapar en databasanslutning, ett SQL-statement och kör frågan.
         try (Connection connection = DriverManager.getConnection(dbUrl);
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(sql)) {
-            // skapar en databasanslutning, ett SQL-statement och kör frågan.
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-            if (resultSet.next()) {
-                response.getWriter().write("<h2>Login Successful</h2>");
+             // binda parametrarna för att förhindra sql injection
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+
+            // if (resultSet.next())
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    response.getWriter().write("<h2>Login Successful</h2>");
+                }
+                else {
+                    response.getWriter().write("<h2>Invalid username or password</h2>");
+                    // om inga resultat hittas, skicka ett felmeddelande.
+                }
                 // om användaren hittas i databasen, skicka ett success till klienten.
-            } else {
-                response.getWriter().write("<h2>Invalid username or password</h2>");
-                // om inga resultat hittas, skicka ett felmeddelande.
             }
         } catch (Exception e) {
             e.printStackTrace();
