@@ -13,7 +13,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-
 // en servlet med namnet "LoginServlet" som hanterar förfrågningar på "/login".
 @WebServlet(name = "LoginServlet", urlPatterns = "/login")
 public class LoginServlet extends HttpServlet {
@@ -49,6 +48,25 @@ public class LoginServlet extends HttpServlet {
         //ResultSet resultSet = statement.executeQuery(sql)) {
         // skapar en databasanslutning, ett SQL-statement och kör frågan.
         try (Connection connection = DriverManager.getConnection(dbUrl);
+
+             // ATT TESTA!
+             // se till att du är tillbaka i ursprunsläge alltså att du använder user postgres
+             // att du inte har ändrat tillbaka i din config fil (om du ändrat något)
+             // skapa en ny databas och börja från scratch, kör sql från md filen så att du
+             // har ett user table och två users
+             // kör SELECT * FROM users så att du är 100% säker på att du har users i din databas
+
+             // ändra rad 50 till detta:
+             // DriverManager.getConnection(url, user, pw);
+
+             // se då till att du har, och att du stavat 100% korrekt:
+             //     @Value("${spring.datasource.username}")
+             //     private String user;
+             //     @Value("${spring.datasource.password}")
+             //     private String pw;
+
+             // testa att starta och gå till http://localhost:8080/login.html
+             // logga in med admin och password
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
              // binda parametrarna för att förhindra sql injection
